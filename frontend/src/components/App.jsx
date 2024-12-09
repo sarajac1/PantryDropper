@@ -1,85 +1,34 @@
-import { useEffect, useState } from 'react'
+import React from 'react'
+import { useInventory } from '../contexts/InventoryContext';
+import '../styles/App.css'; 
 
 
-import './App.css'
+const App = () => {
+  const { inventory, addItem, removeItem, error } = useInventory();
 
-// Funktion för att uppdatera inventory, initialiseras som en tom array 
-function App() {
-  const [inventory, setInventory] = useState([]); 
-  // Värdet av itemName och quantity blir innehållet av användarens inmatade värden 
-  const [itemName, setItemName] = useState('');
-  const [quantity, setQuantity] = useState('');
-
-// Hämtar inventory från Flask API:t
-  useEffect(() => {
-    fetch('/api/inventory')
-      // Parse:ar JSON 
-      .then((response) => response.json())
-      // Uppdaterar inventory 
-      .then((data) => setInventory(data))
-      .catch((error) => console.error('Error fetching inventory', error));
-  }, []);
-
-  const addItem = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/add_item', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_name: itemName, quantity: parseInt(quantity) }),
-      });
-
-      if (response.ok) {
-        const newItem = await response.json();
-        setInventory([...inventory, newItem]);
-        // Rensar fälten
-        setItemName('');
-        setQuantity('');
-      } else {
-        console.error('Error adding item:', await response.json());
-      }
-    } catch (error) {
-      console.error('Error:', error);
+  const handleAddItem = () => {
+    const itemName = prompt('Enter item name:');
+    const quantity = prompt('Enter quantity:');
+    if (itemName && quantity) {
+      addItem(itemName, quantity);
     }
   };
 
-
-
   return (
     <div>
-      <h1>Pantry Inventory</h1>
+      <h1>Inventory App</h1>
+      {error && <div style={{ color: 'red' }}>Error: {error}</div>}
+      <button onClick={handleAddItem}>Add Item</button>
       <ul>
         {inventory.map((item) => (
           <li key={item.id}>
             {item.item_name} - {item.quantity}
+            <button onClick={() => removeItem(item.id)}>Remove</button>
           </li>
         ))}
       </ul>
-
-      <h2>Add a new item</h2>
-      <form onSubmit={addItem}>
-        <div>
-        <label>Item Name: </label>
-        <input
-          type="text"
-          value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
-          required
-        />
-        </div>
-        <div>
-          <label>Quantity</label>
-          <input
-            type="text"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Add item</button>
-      </form>
     </div>
   );
-}
+};
 
-export default App
+export default App;

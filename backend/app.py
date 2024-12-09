@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 import sqlite3
 
 # Initialiserar Flask
 app = Flask(__name__)
+CORS(app)
 
 
 def connect_db():
@@ -17,7 +19,7 @@ def home():
     return jsonify({"message": "Welcome to PantryDropper."})
 
 # Endpoint för att lägga till vara
-@app.route('/add_item', methods=['POST'])
+@app.route('/api/add_item', methods=['POST'])
 def add_item():
     data = request.get_json()
     
@@ -45,7 +47,7 @@ def add_item():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint för att läsa varor från inventory 
-@app.route('/inventory', methods=['GET'])
+@app.route('/api/inventory', methods=['GET'])
 def get_inventory():
     try:
         connection = connect_db()
@@ -63,7 +65,7 @@ def get_inventory():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint för att redigera varor 
-@app.route('/update_item/<int:item_id>', methods=['PUT'])
+@app.route('/api/update_item/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
     try:
         data = request.get_json()
@@ -128,7 +130,7 @@ def update_item(item_id):
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 # Endpoint för att ta bort vara från inventory
-@app.route('/delete_item/<int:item_id>', methods = ['DELETE'])
+@app.route('/api/delete_item/<int:item_id>', methods = ['DELETE'])
 def delete_item(item_id):
     try:
         connection = connect_db()
