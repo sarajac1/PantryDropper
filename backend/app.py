@@ -40,9 +40,15 @@ def add_item():
         ''', (item_name, quantity))
         
         connection.commit()
+
+        new_id = cursor.lastrowid; 
         connection.close()
         
-        return jsonify({"message": "Item added successfully"}), 201
+        return jsonify({
+            "id": new_id,
+            "item_name": item_name,
+            "quantity": quantity
+        }), 201
     except sqlite3.Error as e:
         return jsonify({"error": str(e)}), 500
 

@@ -44,7 +44,7 @@ export const InventoryProvider = ({ children }) => {
     console.log('Adding item:', { itemName, quantity });
     const newItem = { item_name: itemName, quantity: parseInt(quantity, 10) };
 
-    fetch('/api/add_item', {
+   return fetch('/api/add_item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newItem),
