@@ -25,13 +25,18 @@ const App = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Inventory App</h1>
-      {error && <div style={{ color: 'red' }}>Error: {error}</div>}
+
+      {error && (
+        <div className="error-message">
+          Error: {error}
+        </div>
+      )}
 
       {/* Add Item Form */}
       <form onSubmit={handleSubmit}>
-        <div>
+        <div className="form-group">
           <label htmlFor="itemName">Item Name:</label>
           <input
             id="itemName"
@@ -40,7 +45,7 @@ const App = () => {
             onChange={(e) => setItemName(e.target.value)}
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="quantity">Quantity:</label>
           <input
             id="quantity"
@@ -49,15 +54,20 @@ const App = () => {
             onChange={(e) => setQuantity(e.target.value)}
           />
         </div>
-        <button type="submit">Add Item</button>
+        <button type="submit" className="submit-btn">Add Item</button>
       </form>
 
       {/* Inventory List */}
-      <ul>
+      <ul className="inventory-list">
         {inventory.map((item) => (
-          <li key={item.id}>
-            {item.item_name} - {item.quantity}
-            <button onClick={() => removeItem(item.id)}>Remove</button>
+          <li key={item.id} className="inventory-item">
+            <span>{item.item_name} - {item.quantity}</span>
+            <button
+              onClick={() => removeItem(item.id)}
+              className="remove-btn"
+            >
+              Remove
+            </button>
           </li>
         ))}
       </ul>
@@ -66,3 +76,4 @@ const App = () => {
 };
 
 export default App;
+
