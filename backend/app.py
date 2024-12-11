@@ -26,6 +26,8 @@ def add_item():
     # Validerar input
     item_name = data.get('item_name')
     quantity = data.get('quantity')
+    expiration_date = data.get('expiration_date', 'unknown')
+    description = data.get('description', None)
     
     if not item_name or quantity is None:
         return jsonify({"error": "Item name and quantity are required"}), 400
@@ -34,10 +36,13 @@ def add_item():
         connection = connect_db()
         cursor = connection.cursor()
         
-        cursor.execute('''
-            INSERT INTO inventory (item_name, quantity)
-            VALUES (?, ?)
-        ''', (item_name, quantity))
+        cursor.execute(
+            '''
+            INSERT INTO inventory (item_name, quantity, expiration_date, description)
+            VALUES (?, ?, ?, ?)
+            ''',
+            (item_name, quantity, expiration_date, description)
+        )
         
         connection.commit()
 
@@ -45,9 +50,7 @@ def add_item():
         connection.close()
         
         return jsonify({
-            "id": new_id,
-            "item_name": item_name,
-            "quantity": quantity
+            "id": new_id, 'message': 'Item added successfully'
         }), 201
     except sqlite3.Error as e:
         return jsonify({"error": str(e)}), 500

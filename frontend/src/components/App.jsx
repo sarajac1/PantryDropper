@@ -6,21 +6,25 @@ const App = () => {
   const { inventory, addItem, removeItem, error } = useInventory();
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [expirationDate, setExpirationDate] = useState('');
+  const [description, setDescription] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (itemName.trim() && quantity.trim()) {
-      addItem(itemName, quantity)
+      addItem(itemName, quantity, expirationDate || 'unknown', description)
         .then(() => {
           console.log('Item added successfully.');
           setItemName('');
           setQuantity('');
+          setExpirationDate('');
+          setDescription('');
         })
         .catch((error) => {
           console.error('Error adding item:', error);
         });
     } else {
-      console.error('Both item name and quantity are required.');
+      console.error('Item name and quantity are required.');
     }
   };
 
@@ -54,6 +58,22 @@ const App = () => {
             onChange={(e) => setQuantity(e.target.value)}
           />
         </div>
+        <div className="form-group">
+          <label htmlFor="expirationDate">Expiration Date:</label>
+          <input
+            id="expirationDate"
+            type="date"
+            value={expirationDate}
+            onChange={(e) => setExpirationDate(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="description">Description:</label>
+          <textarea id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          ></textarea>
+        </div>
         <button type="submit" className="submit-btn">Add Item</button>
       </form>
 
@@ -61,11 +81,11 @@ const App = () => {
       <ul className="inventory-list">
         {inventory.map((item) => (
           <li key={item.id} className="inventory-item">
-            <span>{item.item_name} - {item.quantity}</span>
-            <button
-              onClick={() => removeItem(item.id)}
-              className="remove-btn"
-            >
+            <span>
+              {item.item_name} - {item.quantity} - Expiry: {item.expiration_date || 'unknown'}
+              {item.description && ` (${item.description})`}
+            </span>
+            <button onClick={() => removeItem(item.id)} className="remove-btn">
               Remove
             </button>
           </li>

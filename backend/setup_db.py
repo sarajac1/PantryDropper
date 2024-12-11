@@ -15,6 +15,17 @@ def create_db():
     )
     ''')
 
+# Lägger till nya kolumner 
+  try:
+    cursor.execute('ALTER TABLE inventory ADD COLUMN expiration_date TEXT')
+  except sqlite3.OperationalError:
+    print("column 'expiration_date' already exists.")
+  
+  try:
+    cursor.execute('ALTER TABLE inventory ADD COLUMN description TEXT')
+  except sqlite3.OperationalError:
+    print("Column 'description' already exists.")
+
   # Sparar ändringar i databasen
   connection.commit()
   connection.close()
