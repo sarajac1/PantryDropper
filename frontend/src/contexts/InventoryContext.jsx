@@ -40,9 +40,13 @@ export const InventoryProvider = ({ children }) => {
       });
   }, []);
 
-  const addItem = (itemName, quantity) => {
-    console.log('Adding item:', { itemName, quantity });
-    const newItem = { item_name: itemName, quantity: parseInt(quantity, 10) };
+  const addItem = (itemName, quantity, expirationDate, description) => {
+    console.log('Adding item:', { itemName, quantity, expirationDate, description });
+    const newItem = {
+      item_name: itemName, quantity: parseInt(quantity, 10),
+      expiration_date: expirationDate,
+      description: description
+     };
 
    return fetch('/api/add_item', {
       method: 'POST',
@@ -87,13 +91,46 @@ export const InventoryProvider = ({ children }) => {
       .catch((error) => console.error('Error deleting item:', error));
   };
 
+  const updateItem = (itemId, updatedItem) => {
+    return fetch(`/api/update_item/${itemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedItem),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then(text => {
+            console.error('Update item error text:', text);
+            throw new Error(`HTTP error! status: ${res.status}, text: ${text}`);
+          });
+        }
+        return res.json();
+      })
+      .then((updatedItemFromServer) => {
+        setInventory((prevInventory) =>
+          prevInventory.map((item) =>
+            item.id === itemId ? updatedItemFromServer : item
+          )
+        );
+        return updatedItemFromServer;
+      })
+      .catch((error) => {
+        console.error('Error updating item:', error);
+        setError(error.message);
+        throw error;
+      });
+  };
+
+
   // Add error display to context
   return (
     <InventoryContext.Provider
       value={{
         inventory,
+        setInventory,
         addItem,
         removeItem,
+        updateItem,
         error, // Expose error for debugging
       }}
     >

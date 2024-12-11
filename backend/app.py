@@ -82,10 +82,12 @@ def update_item(item_id):
         # Hämtar värden
         new_name = data.get('item_name')
         new_quantity = data.get('quantity')
+        new_expiration_date = data.get('expiration_date')
+        new_description = data.get('description')
         
         # Validerar input
-        if new_name is None and new_quantity is None:
-            return jsonify({"error": "Please provide at least item name or quantity"}), 400
+        if all(value is None for value in [new_name, new_quantity, new_expiration_date, new_description]):
+            return jsonify({"error": "Please provide at least one field to update"}), 400
             
         connection = connect_db()
         cursor = connection.cursor()
@@ -101,6 +103,14 @@ def update_item(item_id):
         if new_quantity is not None:
             update_parts.append('quantity = ?')
             params.append(new_quantity)
+
+        if new_expiration_date is not None:
+            update_parts.append('expiration_date = ?')
+            params.append(new_expiration_date)
+        
+        if new_description is not None:
+            update_parts.append('description = ?')
+            params.append(new_description)
             
         # Add item_id to params
         params.append(item_id)
@@ -118,20 +128,15 @@ def update_item(item_id):
         if cursor.rowcount == 0:
             connection.close()
             return jsonify({"error": "Item not found"}), 404
+        
+        cursor.execute('SELECT * FROM inventory WHERE id = ?', (item_id,))
+        updated_item = cursor.fetchone()
             
         connection.commit()
         connection.close()
-        
-        return jsonify({
-            "message": "Item updated successfully",
-            "item_id": item_id,
-            "updates": {
-                key: value for key, value in {
-                    'item_name': new_name,
-                    'quantity': new_quantity
-                }.items() if value is not None
-            }
-        }), 200
+
+        return jsonify(dict(updated_item)), 200
+
         
     except sqlite3.Error as e:
         return jsonify({"error": f"Database error: {str(e)}"}), 500

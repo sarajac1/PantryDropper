@@ -3,11 +3,18 @@ import { useInventory } from '../contexts/InventoryContext';
 import '../styles/App.css';
 
 const App = () => {
-  const { inventory, addItem, removeItem, error } = useInventory();
+  const { inventory, addItem, removeItem, updateItem, error } = useInventory();
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
   const [description, setDescription] = useState('');
+  const [editItem, setEditItem] = useState(null);
+  const [editValues, setEditValues] = useState({
+    item_name: '',
+    quantity: '',
+    expiration_date: '',
+    description: '',
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,6 +33,31 @@ const App = () => {
     } else {
       console.error('Item name and quantity are required.');
     }
+  };
+
+  const handleEdit = (item) => {
+    setEditItem(item.id);
+    setEditValues({
+      item_name: item.item_name,
+      quantity: item.quantity,
+      expiration_date: item.expiration_date || '',
+      description: item.description || '',
+    })
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const saveEdit = () => {
+    if (!editItem) return;
+
+    updateItem(editItem, editValues) // `updateItem` is now from context
+      .then(() => {
+        setEditItem(null); // Close edit mode on success
+      })
+      .catch((err) => console.error('Error saving edit:', err));
   };
 
   return (
@@ -81,13 +113,58 @@ const App = () => {
       <ul className="inventory-list">
         {inventory.map((item) => (
           <li key={item.id} className="inventory-item">
-            <span>
-              {item.item_name} - {item.quantity} - Expiry: {item.expiration_date || 'unknown'}
-              {item.description && ` (${item.description})`}
-            </span>
-            <button onClick={() => removeItem(item.id)} className="remove-btn">
-              Remove
-            </button>
+            {editItem === item.id ? (
+              <>
+                <input
+                  type="text"
+                  name="item_name"
+                  value={editValues.item_name}
+                  onChange={handleEditChange}
+                />
+                <input
+                  type="number"
+                  name="quantity"
+                  value={editValues.quantity}
+                  onChange={handleEditChange}
+                />
+                <input
+                  type="date"
+                  name="expiration_date"
+                  value={editValues.expiration_date}
+                  onChange={handleEditChange}
+                />
+                <textarea
+                  name="description"
+                  value={editValues.description}
+                  onChange={handleEditChange}
+                ></textarea>
+                <button onClick={() => saveEdit()} className="save-btn">
+                  Save
+                </button>
+                <button onClick={() => setEditItem(null)} className="cancel-btn">
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <span>
+                  {item.item_name} - {item.quantity} - Expiry: {item.expiration_date || 'unknown'}
+                  {item.description && ` (${item.description})`}
+                </span>
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="edit-btn"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => removeItem(item.id)}
+                  className="remove-btn"
+                >
+                  Remove
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>
