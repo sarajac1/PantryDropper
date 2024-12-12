@@ -63,13 +63,25 @@ export const InventoryProvider = ({ children }) => {
         }
         return res.json();
       })
-      .then((savedItem) => {
-        console.log('Saved item:', savedItem);
-        setInventory((prevInventory) => [...prevInventory, savedItem]);
+      .then((savedItemResponse) => {
+        // Fetch the full item details
+        return fetch(`/api/get_item/${savedItemResponse.id}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error('Failed to fetch added item details');
+            }
+            return res.json();
+          });
+      })
+      .then((fullItem) => {
+        console.log('Full saved item:', fullItem);
+        setInventory((prevInventory) => [...prevInventory, fullItem]);
+        return fullItem;
       })
       .catch((error) => {
         console.error('Error adding item:', error);
         setError(error.message);
+        throw error;
       });
   };
 
@@ -120,6 +132,8 @@ export const InventoryProvider = ({ children }) => {
         throw error;
       });
   };
+
+  
 
 
   // Add error display to context

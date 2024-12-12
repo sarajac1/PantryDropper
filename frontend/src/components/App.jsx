@@ -62,7 +62,7 @@ const App = () => {
 
   return (
     <div className="container">
-      <h1>Inventory App</h1>
+      <h1>PantryDropper</h1>
 
       {error && (
         <div className="error-message">
@@ -101,7 +101,8 @@ const App = () => {
         </div>
         <div className="form-group">
           <label htmlFor="description">Description:</label>
-          <textarea id="description"
+          <textarea
+            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           ></textarea>
@@ -148,26 +149,29 @@ const App = () => {
             ) : (
               <>
                 <span>
-                  {item.item_name} - {item.quantity} - Expiry: {item.expiration_date || 'unknown'}
+                  {item.item_name} - Qty: {item.quantity} - Expiry: {item.expiration_date || 'unknown'}
                   {item.description && ` (${item.description})`}
                 </span>
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="edit-btn"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="remove-btn"
-                >
-                  Remove
-                </button>
+                <div className="inventory-item-actions">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="edit-btn"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="remove-btn"
+                  >
+                    Remove
+                  </button>
+                </div>
               </>
             )}
           </li>
         ))}
       </ul>
+
     </div>
   );
 };

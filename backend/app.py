@@ -47,11 +47,13 @@ def add_item():
         connection.commit()
 
         new_id = cursor.lastrowid; 
+        
+        cursor.execute('SELECT * FROM inventory WHERE id = ?', (new_id,))
+        new_item = cursor.fetchone()
+        
         connection.close()
         
-        return jsonify({
-            "id": new_id, 'message': 'Item added successfully'
-        }), 201
+        return jsonify(dict(new_item)), 201
     except sqlite3.Error as e:
         return jsonify({"error": str(e)}), 500
 
@@ -166,6 +168,25 @@ def delete_item(item_id):
         return jsonify({"error": f"Database error: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+    
+    
+@app.route('/api/get_item/<int:item_id>', methods=['GET'])
+def get_item(item_id):
+    try:
+        connection = connect_db()
+        cursor = connection.cursor()
+        
+        cursor.execute('SELECT * FROM inventory WHERE id = ?', (item_id,))
+        item = cursor.fetchone()
+        
+        connection.close()
+        
+        if item is None:
+            return jsonify({"error": "Item not found"}), 404
+        
+        return jsonify(dict(item))
+    except sqlite3.Error as e:
+        return jsonify({"error": str(e)}), 500
 
         
     
