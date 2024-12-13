@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useInventory } from '../contexts/InventoryContext';
 import '../styles/App.css';
+import BarcodeScanner from './BarcodeScanner';
+import axios from 'axios'; 
+
 
 const App = () => {
   const { inventory, addItem, removeItem, updateItem, error } = useInventory();
@@ -60,6 +63,25 @@ const App = () => {
       .catch((err) => console.error('Error saving edit:', err));
   };
 
+
+  const handleScan = async (barcode) => {
+    // Fetch product info based on the barcode
+    try {
+      const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const product = response.data.product;
+      if (product) {
+        setItemName(product.product_name || '');
+        setDescription(product.ingredients_text || '');
+        // Add more fields if needed
+      } else {
+        console.error('Product not found');
+      }
+    } catch (error) {
+      console.error('Error fetching product data:', error);
+    }
+  };
+
+
   return (
     <div className="container">
       <h1>PantryDropper</h1>
@@ -69,6 +91,11 @@ const App = () => {
           Error: {error}
         </div>
       )}
+
+      {/* Barcode Scanner */}
+      <div id="scanner">
+        <BarcodeScanner onScan={handleScan} />
+      </div>
 
       {/* Add Item Form */}
       <form onSubmit={handleSubmit}>
@@ -171,10 +198,10 @@ const App = () => {
           </li>
         ))}
       </ul>
-
     </div>
   );
 };
+
 
 export default App;
 
